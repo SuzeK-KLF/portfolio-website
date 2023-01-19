@@ -1,5 +1,5 @@
 import React from "react";
-import { BsLinkedin, BsGithub,BsDribbble, BsInstagram } from "react-icons/bs";
+import { BsLinkedin, BsGithub, BsInstagram } from "react-icons/bs";
 
 const HeaderSocials = () => {
   return (

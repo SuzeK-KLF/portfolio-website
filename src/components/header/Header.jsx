@@ -2,7 +2,7 @@ import React from "react";
 import "./header.css";
 import CTA from "./CTA";
 import MEB from "../../assets/me-black-remove3.png";
-import MEW from "../../assets/me_white.png";
+// import MEW from "../../assets/me_white.png";
 import HeaderSocials from "./HeaderSocials";
 import { BsArrowRightShort } from "react-icons/bs";
 

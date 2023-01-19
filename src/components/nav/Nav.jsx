@@ -9,11 +9,15 @@ import {
 } from "react-icons/ai";
 
 const Nav = () => {
-  const [activeNav, setActiveNav] = useState("#");
+  const [activeNav, setActiveNav] = useState("#top");
 
   return (
     <nav>
-      <a href="#" className={activeNav === "#" ? "active" : ""}>
+      <a
+        href="#top"
+        onClick={() => setActiveNav("#top")}
+        className={activeNav === "#top" ? "active" : ""}
+      >
         <AiOutlineHome />
       </a>
       <a
