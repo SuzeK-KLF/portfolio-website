@@ -18,17 +18,17 @@ const Portfolio = () => {
           <div className="portfolio_item-image">
             <img src={IMG1} alt="" />
           </div>
-          <h3>This is a portfolio item title</h3>
+          <h3>Buildee</h3>
           <div className="portfolio_item-cta">
-            <a href="https://github.com" className="btn">
+            {/* <a href="https://github.com" className="btn">
               Github
-            </a>
-            <a href="https://github.com" className="btn btn-primary">
-              Live Demo
+            </a> */}
+            <a href="https://www.gobuildee.com/" className="btn btn-primary">
+              Website
             </a>
           </div>
         </article>
-        <article className="portfolio_item">
+        {/* <article className="portfolio_item">
           <div className="portfolio_item-image">
             <img src={IMG2} alt="" />
           </div>
@@ -97,7 +97,7 @@ const Portfolio = () => {
               Live Demo
             </a>
           </div>
-        </article>
+        </article> */}
       </div>
     </section>
   );

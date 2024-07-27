@@ -17,43 +17,43 @@ const Services = () => {
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Conduct user research and usability testing to understand user
+                needs and improve user experience.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Create wireframes, prototypes, and high-fidelity mockups to
+                visually communicate design concepts.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Design responsive and adaptive interfaces for seamless user
+                experiences across devices.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Develop interactive and user-friendly UI components using modern
+                design tools and techniques.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Collaborate with developers to ensure design feasibility and
+                implementation accuracy.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Maintain consistency in design through the creation of style
+                guides and design systems.
               </p>
             </li>
           </ul>
@@ -68,48 +68,48 @@ const Services = () => {
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Develop dynamic, responsive, and user-friendly websites using
+                the latest web technologies.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Integrate APIs and third-party services to extend the
+                functionality of web applications.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Optimize website performance and speed for a seamless user
+                experience.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Implement robust backend solutions using Python, MySQL, and
+                other server-side technologies.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Ensure cross-browser compatibility and mobile responsiveness of
+                web applications.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Maintain and update websites regularly to keep them secure and
+                up-to-date.
               </p>
             </li>
           </ul>
         </article>
-        {/*--------------------------- Web Development------------------------- */}
+        {/*---------------------------Content creation------------------------- */}
         <article className="service">
           <div className="service_head">
             <h3>Content Creation</h3>
@@ -118,43 +118,43 @@ const Services = () => {
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Develop engaging and high-quality written content for blogs,
+                articles, and social media.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Create visually appealing graphics and multimedia content to
+                enhance digital presence.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Produce video content, including scripting, filming, and
+                editing, for various platforms.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Optimize content for SEO to improve search engine rankings and
+                drive organic traffic.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Manage and curate content across multiple channels to ensure
+                brand consistency.
               </p>
             </li>
             <li>
               <BiCheck className="service_list-icon" />
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Temporibus, sed architecto nam nulla neque vero.{" "}
+                Collaborate with clients to understand their needs and deliver
+                tailored content solutions.
               </p>
             </li>
           </ul>
