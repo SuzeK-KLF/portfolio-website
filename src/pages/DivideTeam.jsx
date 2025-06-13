@@ -1,6 +1,11 @@
-import React from "react";
+import { useEffect } from "react";
+import { uploadPlayers } from "../utils/uploadPlayers";
 
 const DivideTeam = () => {
+    useEffect(() => {
+        console.log('start uploding..')
+        // uploadPlayers(); 
+    }, []);
     return (
         <div>
             <h1>Team Divider</h1>
