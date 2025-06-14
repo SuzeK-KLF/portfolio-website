@@ -115,6 +115,7 @@ export default function TeamDividerPage() {
 
     async function handleDeletePlayer(id) {
         try {
+            console.log("---- try to delete " + id);
             await deleteDoc(doc(db, "players", id));
             setPlayers(players.filter((p) => p.id !== id));
             message.success("Deleted");
@@ -124,9 +125,7 @@ export default function TeamDividerPage() {
     }
 
     return (
-        <div
-            style={{ padding: 20, backgroundColor: "#001f3f", minHeight: "100vh", color: "white" }}
-        >
+        <div style={{ padding: 20, minHeight: "100vh", color: "white" }}>
             <Typography.Title level={2} style={{ color: "#00bcd4" }}>
                 ⚽ Sunday Football Team Divider
             </Typography.Title>
