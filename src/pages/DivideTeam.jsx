@@ -63,7 +63,9 @@ export default function TeamDividerPage() {
             setLoading(true);
             try {
                 const snapshot = await getDocs(collection(db, "players"));
+                console.log("snapshot", snapshot);
                 const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                console.log("data", data);
                 setPlayers(data);
             } catch (err) {
                 message.error("Failed to load players.");
@@ -182,7 +184,15 @@ export default function TeamDividerPage() {
     const fairnessStatus = getFairnessStatus();
 
     return (
-        <Layout style={{ minHeight: "100vh", background: "transparent" }}>
+        <Layout
+            style={{
+                minHeight: "100vh",
+                backgroundImage:
+                    "url('https://www.musco.com/wp-content/uploads/2021/09/Woodland_1200x600.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
+        >
             <Header
                 style={{
                     background: "linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)",
@@ -608,11 +618,7 @@ function TeamColumn({ title, players, color, loading }) {
                     }}
                 >
                     <img
-                        src={
-                            color === "#1890ff"
-                                ? "https://cdn-icons-png.flaticon.com/512/892/892530.png"
-                                : "https://cdn-icons-png.flaticon.com/512/892/892528.png"
-                        }
+                        src={"https://cdn-icons-png.flaticon.com/512/892/892530.png"}
                         alt="Empty team"
                         style={{ width: 80, opacity: 0.5, marginBottom: 16 }}
                     />
