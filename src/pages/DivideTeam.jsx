@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
     Button,
@@ -10,7 +8,6 @@ import {
     Space,
     Tag,
     Divider,
-    message,
     Slider,
     Popconfirm,
     Layout,
@@ -21,7 +18,7 @@ import {
     FloatButton,
 } from "antd";
 import { db } from "../firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, getDoc, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { random } from "lodash";
 import {
     UserAddOutlined,
@@ -32,15 +29,17 @@ import {
     TrophyOutlined,
 } from "@ant-design/icons";
 import "antd/dist/reset.css";
+import { App } from "antd";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 const positions = ["Forward", "Midfield", "Defense", "Goalkeeper"];
-const ageGroups = ["30s", "40s", "50+"];
-const ageGroupValue = { "30s": 30, "40s": 40, "50+": 55 };
+const ageGroups = ["20s", "30s", "40s", "50+"];
+const ageGroupValue = { "20s": 20, "30s": 30, "40s": 40, "50+": 55 };
 
 export default function TeamDividerPage() {
+    const { message } = App.useApp();
     const {
         token: { colorBgContainer, colorPrimary },
     } = theme.useToken();
@@ -63,9 +62,7 @@ export default function TeamDividerPage() {
             setLoading(true);
             try {
                 const snapshot = await getDocs(collection(db, "players"));
-                console.log("snapshot", snapshot);
                 const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-                console.log("data", data);
                 setPlayers(data);
             } catch (err) {
                 message.error("Failed to load players.");
@@ -142,21 +139,39 @@ export default function TeamDividerPage() {
             message.warning("Name and position required.");
             return;
         }
+
         setLoading(true);
         try {
             if (editingId) {
                 await updateDoc(doc(db, "players", editingId), newPlayer);
-                setPlayers(players.map((p) => (p.id === editingId ? { ...p, ...newPlayer } : p)));
+
+                const updatedPlayers = players.map((p) =>
+                    p.id === editingId ? { ...p, ...newPlayer } : p
+                );
+                setPlayers(updatedPlayers);
                 message.success("Player updated.");
-                setEditingId(null);
             } else {
-                const docRef = await addDoc(collection(db, "players"), newPlayer);
-                message.success("Player added.");
+                const docRef = await addDoc(collection(db, "players"), {
+                    name: newPlayer.name,
+                    ageGroup: newPlayer.ageGroup,
+                    positions: newPlayer.positions,
+                    abilityScores: newPlayer.abilityScores,
+                });
+
                 setPlayers([...players, { ...newPlayer, id: docRef.id }]);
+                message.success("Player added.");
             }
-            setNewPlayer({ name: "", ageGroup: "30s", positions: [], abilityScores: 70 });
+
+            // Clear form
+            setNewPlayer({
+                name: "",
+                ageGroup: "30s",
+                positions: [],
+                abilityScores: 70,
+            });
         } catch (e) {
-            message.error("Operation failed.");
+            console.error("Update error:", e);
+            message.error(`Operation failed: ${e.message}`);
         } finally {
             setLoading(false);
         }
@@ -165,7 +180,7 @@ export default function TeamDividerPage() {
     const handleDeletePlayer = async (id) => {
         setLoading(true);
         try {
-            await deleteDoc(doc(db, "players", id));
+            // await deleteDoc(doc(db, "players", id));
             setPlayers(players.filter((p) => p.id !== id));
             message.success("Deleted");
         } catch (e) {
@@ -388,7 +403,7 @@ export default function TeamDividerPage() {
                                                     color: "white",
                                                 }}
                                             >
-                                                {p.name.charAt(0).toUpperCase()}
+                                                {p.flag ? p.flag : p.name.charAt(0).toUpperCase()}
                                             </Avatar>
                                             <div>
                                                 <Text strong style={{ display: "block" }}>
@@ -409,6 +424,12 @@ export default function TeamDividerPage() {
                                             />
                                             <Text type="secondary" style={{ fontSize: 12 }}>
                                                 Ability: {p.abilityScores || 70}
+                                            </Text>
+                                            <Text
+                                                type="secondary"
+                                                style={{ fontSize: 12, marginLeft: 6 }}
+                                            >
+                                                颜值: 💯
                                             </Text>
                                         </div>
 
@@ -478,7 +499,7 @@ export default function TeamDividerPage() {
                             Team Division
                         </Title>
                         {fairnessScore > 0 && (
-                            <Text type="secondary" style={{ fontSize: 12 }}>
+                            <Text type="secondary" style={{ fontSize: 16 }}>
                                 {blueTeam.length} vs {redTeam.length} players
                             </Text>
                         )}
@@ -486,8 +507,18 @@ export default function TeamDividerPage() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                         {fairnessScore > 0 && (
-                            <div style={{ textAlign: "right" }}>
-                                <Text strong style={{ color: fairnessStatus.color }}>
+                            <div
+                                style={{
+                                    textAlign: "right",
+                                    backgroundColor: "#f6ffed",
+                                    padding: "6px 16px",
+                                    borderRadius: 8,
+                                    border: `1px solid ${fairnessStatus.color}`,
+                                    display: "inline-block",
+                                    marginTop: 2,
+                                }}
+                            >
+                                <Text strong style={{ color: fairnessStatus.color, fontSize: 14 }}>
                                     {fairnessStatus.text}
                                 </Text>
                                 <Progress
@@ -495,7 +526,7 @@ export default function TeamDividerPage() {
                                     size="small"
                                     strokeColor={fairnessStatus.color}
                                     showInfo={false}
-                                    style={{ width: 120 }}
+                                    style={{ width: 120, marginTop: 4 }}
                                 />
                             </div>
                         )}
