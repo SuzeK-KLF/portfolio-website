@@ -15,7 +15,7 @@ import {
     Popconfirm,
 } from "antd";
 import { db } from "../firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { random } from "lodash";
 import "antd/dist/reset.css";
 
@@ -31,6 +31,7 @@ export default function TeamDividerPage() {
         positions: [],
         abilityScores: 70,
     });
+    const [editingId, setEditingId] = useState(null);
     const [blueTeam, setBlueTeam] = useState([]);
     const [redTeam, setRedTeam] = useState([]);
     const [fairnessText, setFairnessText] = useState("");
@@ -39,11 +40,7 @@ export default function TeamDividerPage() {
         const fetchPlayers = async () => {
             try {
                 const snapshot = await getDocs(collection(db, "players"));
-                const data = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    editing: false,
-                }));
+                const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
                 setPlayers(data);
             } catch (err) {
                 message.error("Failed to load players.");
@@ -53,21 +50,21 @@ export default function TeamDividerPage() {
         fetchPlayers();
     }, []);
 
-    function shuffle(array) {
+    const shuffle = (array) => {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [arr[i], arr[j]] = [arr[j], arr[i]];
         }
         return arr;
-    }
+    };
 
-    function calculateAverageAge(team) {
+    const calculateAverageAge = (team) => {
         const total = team.reduce((sum, p) => sum + ageGroupValue[p.ageGroup], 0);
         return team.length ? total / team.length : 0;
-    }
+    };
 
-    function splitTeams() {
+    const splitTeams = () => {
         const grouped = { Goalkeeper: [], Defense: [], Midfield: [], Forward: [] };
         players.forEach((p) => {
             const primary = p.positions?.[0];
@@ -96,43 +93,59 @@ export default function TeamDividerPage() {
             setRedTeam(red);
             setFairnessText(text);
         }, 0);
-    }
+    };
 
-    async function handleAddPlayer() {
+    const handleAddOrUpdatePlayer = async () => {
         if (!newPlayer.name || newPlayer.positions.length === 0) {
             message.warning("Name and position required.");
             return;
         }
         try {
-            await addDoc(collection(db, "players"), newPlayer);
-            message.success("Player added.");
-            setPlayers([...players, { ...newPlayer, id: random(), editing: false }]);
+            if (editingId) {
+                await updateDoc(doc(db, "players", editingId), newPlayer);
+                setPlayers(players.map((p) => (p.id === editingId ? { ...p, ...newPlayer } : p)));
+                message.success("Player updated.");
+                setEditingId(null);
+            } else {
+                const docRef = await addDoc(collection(db, "players"), newPlayer);
+                message.success("Player added.");
+                setPlayers([...players, { ...newPlayer, id: docRef.id }]);
+            }
             setNewPlayer({ name: "", ageGroup: "30s", positions: [], abilityScores: 70 });
         } catch (e) {
-            message.error("Failed to add player.");
+            message.error("Operation failed.");
         }
-    }
+    };
 
-    async function handleDeletePlayer(id) {
+    const handleDeletePlayer = async (id) => {
         try {
-            console.log("---- try to delete " + id);
             await deleteDoc(doc(db, "players", id));
             setPlayers(players.filter((p) => p.id !== id));
             message.success("Deleted");
         } catch (e) {
             message.error("Delete failed");
         }
-    }
+    };
 
     return (
-        <div style={{ padding: 20, minHeight: "100vh", color: "white" }}>
+        <div
+            style={{
+                padding: 20,
+                minHeight: "100vh",
+                backgroundImage:
+                    "url('https://www.musco.com/wp-content/uploads/2021/09/Woodland_1200x600.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                color: "white",
+            }}
+        >
             <Typography.Title level={2} style={{ color: "#00bcd4" }}>
                 ⚽ Sunday Football Team Divider
             </Typography.Title>
-            <div style={{ display: "flex", gap: 24 }}>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <Card
-                    title="Add Player"
-                    style={{ flex: 1, backgroundColor: "#00334d", color: "white" }}
+                    title={editingId ? "Edit Player" : "Add Player"}
+                    style={{ flex: 1, backgroundColor: "#002a38", color: "white" }}
                 >
                     <Space direction="vertical" style={{ width: "100%" }}>
                         <Input
@@ -162,9 +175,24 @@ export default function TeamDividerPage() {
                                 onChange={(v) => setNewPlayer({ ...newPlayer, abilityScores: v })}
                             />
                         </div>
-                        <Button type="primary" onClick={handleAddPlayer}>
-                            Add Player
+                        <Button type="primary" onClick={handleAddOrUpdatePlayer}>
+                            {editingId ? "Update" : "Add Player"}
                         </Button>
+                        {editingId && (
+                            <Button
+                                onClick={() => {
+                                    setEditingId(null);
+                                    setNewPlayer({
+                                        name: "",
+                                        ageGroup: "30s",
+                                        positions: [],
+                                        abilityScores: 70,
+                                    });
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        )}
                     </Space>
                 </Card>
 
@@ -172,7 +200,7 @@ export default function TeamDividerPage() {
                     title="Player List"
                     style={{
                         flex: 2,
-                        backgroundColor: "#002633",
+                        backgroundColor: "#00394d",
                         color: "white",
                         overflowY: "auto",
                         maxHeight: 420,
@@ -183,6 +211,7 @@ export default function TeamDividerPage() {
                             <Card
                                 key={p.id}
                                 size="small"
+                                hoverable
                                 style={{ width: 160, backgroundColor: "#004d66", color: "white" }}
                             >
                                 <b>{p.name}</b>
@@ -197,7 +226,19 @@ export default function TeamDividerPage() {
                                     ))}
                                 </div>
                                 <div style={{ marginTop: 8 }}>
-                                    <Button size="small" type="link">
+                                    <Button
+                                        size="small"
+                                        type="link"
+                                        onClick={() => {
+                                            setEditingId(p.id);
+                                            setNewPlayer({
+                                                name: p.name,
+                                                ageGroup: p.ageGroup,
+                                                positions: p.positions,
+                                                abilityScores: p.abilityScores,
+                                            });
+                                        }}
+                                    >
                                         Edit
                                     </Button>
                                     <Popconfirm
@@ -217,14 +258,20 @@ export default function TeamDividerPage() {
 
             <Divider />
             <Button onClick={splitTeams} type="primary">
-                🎲 Divide Teams
+                🎲 Divide Teams 
             </Button>
-            <Typography.Text style={{ color: "#00bcd4" }} strong>
-                {fairnessText}
+            <Typography.Text style={{ color: "#FCFCFC" }} strong>
+                {"      "}{fairnessText}
             </Typography.Text>
 
             <Divider />
-            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: 16,
+                }}
+            >
                 <TeamColumn title="🔵 Blue Team" players={blueTeam} color="blue" />
                 <TeamColumn title="🔴 Red Team" players={redTeam} color="red" />
             </div>
@@ -234,27 +281,35 @@ export default function TeamDividerPage() {
 
 function TeamColumn({ title, players, color }) {
     return (
-        <div style={{ flex: 1 }}>
+        <div>
             <Typography.Title level={3} style={{ color: color === "blue" ? "#00bfff" : "#ff4d4f" }}>
                 {title}
             </Typography.Title>
-            <Space direction="vertical" style={{ width: "100%" }}>
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                    gap: 12,
+                }}
+            >
                 {players.map((p) => (
                     <Card
                         key={p.id}
                         size="small"
+                        hoverable
                         style={{
                             backgroundColor: color === "blue" ? "#00bfff" : "#ff4d4f",
                             color: "white",
+                            textAlign: "center",
                         }}
                     >
                         <b>{p.name}</b>
-                        <div>Age: {p.ageGroup}</div>
-                        <div>Ability: {p.abilityScores}</div>
-                        <div>Pos: {p.positions?.join(", ")}</div>
+                        <div>{p.ageGroup}</div>
+                        <div>{p.abilityScores}</div>
+                        <div>{p.positions?.join(", ")}</div>
                     </Card>
                 ))}
-            </Space>
+            </div>
         </div>
     );
 }
