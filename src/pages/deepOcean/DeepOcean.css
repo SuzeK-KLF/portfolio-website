@@ -1,0 +1,111 @@
+.ocean-layout {
+    min-height: 100vh;
+    background: linear-gradient(
+        135deg,
+        #001f3f 0%,
+        #003366 25%,
+        #0066cc 50%,
+        #0099ff 75%,
+        #00ccff 100%
+    );
+    background-size: 400% 400%;
+    animation: oceanGradient 15s ease infinite;
+}
+
+.ocean-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent !important;
+    padding: 20px 0 !important;
+    height: auto !important;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+@keyframes oceanGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.ocean-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.ocean-container {
+    max-width: 1200px;
+    width: 100%;
+    text-align: center;
+}
+
+.ocean-title {
+    color: transparent;
+    margin-bottom: 0 !important;
+}
+
+.title-gradient {
+    background: linear-gradient(90deg, #00ffff, #00ffaa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.ocean-subtitle {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 18px;
+}
+
+.ocean-divider {
+    border-color: rgba(0, 255, 255, 0.3);
+    margin: 20px 0 !important;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.menu-card {
+    background: rgba(0, 40, 80, 0.7);
+    border: 1px solid rgba(0, 200, 255, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 200, 255, 0.2);
+    border-color: rgba(0, 255, 255, 0.5);
+    background: rgba(0, 60, 120, 0.7);
+}
+
+.card-icon {
+    color: #00ffff;
+    padding: 16px;
+    border-radius: 50%;
+    background: rgba(0, 150, 200, 0.2);
+}
+
+.card-title {
+    color: white !important;
+    margin: 0 !important;
+}
+
+.card-description {
+    color: rgba(200, 240, 255, 0.8) !important;
+    max-width: 240px;
+}
