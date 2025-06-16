@@ -164,6 +164,14 @@ img {
     color: #f0f0f0 !important;
 }
 
+.date-selector .ant-select-selection-item {
+    color: #333 !important;
+}
+
+.ant-select-selection-item {
+    color: #333 !important;
+}
+
 .ant-input::placeholder {
     color: #f0f0f0 !important;
 }

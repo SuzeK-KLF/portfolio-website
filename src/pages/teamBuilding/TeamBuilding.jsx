@@ -14,6 +14,7 @@ import {
     Avatar,
     App,
     Table,
+    TimePicker,
 } from "antd";
 import { collection, getDocs, setDoc, addDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -21,6 +22,7 @@ import { UserAddOutlined, StarFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import deepOceanLogo from "../../assets/deepocean.png";
 import { Pie, Column } from "@ant-design/charts";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -138,15 +140,19 @@ const TeamBuilding = () => {
     const currentUser = players.find((p) => p.id === currentUserId);
 
     const dateAttendance = players.reduce((acc, player) => {
-        player.dates?.forEach((date) => {
-            acc[date] = (acc[date] || 0) + (player.headCount || 1);
+        player.dates?.forEach(({ date, start, end }) => {
+            const key = `${date} ${start}-${end}`;
+            acc[key] = (acc[key] || 0) + (player.headCount || 1);
         });
         return acc;
     }, {});
 
     const chartData = Object.entries(dateAttendance)
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .map(([datetime, count]) => ({
+            datetime,
+            count,
+        }))
+        .sort((a, b) => new Date(a.datetime.split(" ")[0]) - new Date(b.datetime.split(" ")[0]));
 
     const totalPeople = players.reduce((sum, p) => sum + (p.headCount || 0), 0);
     const allTools = players.map((p) => p.tools).filter(Boolean);
@@ -408,20 +414,125 @@ const TeamBuilding = () => {
                     title="Your RSVP Info"
                 >
                     <Form layout="vertical">
-                        <Form.Item label="Available Dates">
-                            <Select
-                                mode="multiple"
-                                placeholder="Choose one or more dates"
-                                value={formData.dates}
-                                onChange={(val) => setFormData({ ...formData, dates: val })}
-                            >
-                                <Option value="2025-06-21">June 21 (Sat 周六)</Option>
-                                <Option value="2025-06-22">June 22 (Sun 周日)</Option>
-                                <Option value="2025-06-23">June 23 (Mon 周一)</Option>
-                                <Option value="2025-06-28">June 28 (Sat 周六)</Option>
-                                <Option value="2025-06-29">June 29 (Sun 周日)</Option>
-                                <Option value="2025-06-30">June 30 (Mon 周一)</Option>
-                            </Select>
+                        <Form.Item label="Available Dates & Times">
+                            <Table
+                                bordered
+                                size="small"
+                                pagination={false}
+                                dataSource={formData.dates}
+                                rowKey="date"
+                                columns={[
+                                    {
+                                        title: "Date",
+                                        dataIndex: "date",
+                                        render: (val, _, index) => (
+                                            <Select
+                                                value={val}
+                                                onChange={(newDate) => {
+                                                    const updated = [...formData.dates];
+                                                    updated[index].date = newDate;
+                                                    setFormData({
+                                                        ...formData,
+                                                        dates: updated,
+                                                    });
+                                                }}
+                                                className="date-selector"
+                                                style={{ width: 180 }}
+                                            >
+                                                <Option value="2025-06-21">
+                                                    June 21 (Sat 周六)
+                                                </Option>
+                                                <Option value="2025-06-22">
+                                                    June 22 (Sun 周日)
+                                                </Option>
+                                                <Option value="2025-06-23">
+                                                    June 23 (Mon 周一)
+                                                </Option>
+                                                <Option value="2025-06-28">
+                                                    June 28 (Sat 周六)
+                                                </Option>
+                                                <Option value="2025-06-29">
+                                                    June 29 (Sun 周日)
+                                                </Option>
+                                                <Option value="2025-06-30">
+                                                    June 30 (Mon 周一)
+                                                </Option>
+                                            </Select>
+                                        ),
+                                    },
+                                    {
+                                        title: "Start Time",
+                                        dataIndex: "start",
+                                        render: (val, _, index) => (
+                                            <TimePicker
+                                                value={val ? dayjs(val, "HH:mm") : null}
+                                                format="HH:mm"
+                                                onChange={(time, timeStr) => {
+                                                    const updated = [...formData.dates];
+                                                    updated[index].start = timeStr;
+                                                    setFormData({
+                                                        ...formData,
+                                                        dates: updated,
+                                                    });
+                                                }}
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        title: "End Time",
+                                        dataIndex: "end",
+                                        render: (val, _, index) => (
+                                            <TimePicker
+                                                value={val ? dayjs(val, "HH:mm") : null}
+                                                format="HH:mm"
+                                                onChange={(time, timeStr) => {
+                                                    const updated = [...formData.dates];
+                                                    updated[index].end = timeStr;
+                                                    setFormData({
+                                                        ...formData,
+                                                        dates: updated,
+                                                    });
+                                                }}
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        title: "Actions",
+                                        render: (_, __, index) => (
+                                            <Button
+                                                danger
+                                                onClick={() => {
+                                                    const updated = [...formData.dates];
+                                                    updated.splice(index, 1);
+                                                    setFormData({
+                                                        ...formData,
+                                                        dates: updated,
+                                                    });
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        ),
+                                    },
+                                ]}
+                                footer={() => (
+                                    <Button
+                                        type="dashed"
+                                        onClick={() =>
+                                            setFormData({
+                                                ...formData,
+                                                dates: [
+                                                    ...formData.dates,
+                                                    { date: "", start: "09:00", end: "10:00" },
+                                                ],
+                                            })
+                                        }
+                                        block
+                                    >
+                                        + Add Date & Time
+                                    </Button>
+                                )}
+                            />
                         </Form.Item>
 
                         <Form.Item label="Number of Attendees (including family)">
@@ -502,12 +613,15 @@ const TeamBuilding = () => {
                             Dietary Restrictions: <strong>{allDiets.join(" | ") || "N/A"}</strong>
                         </p>
                         <p style={{ color: "black" }}>
-                            Attendance by Date:
+                            Attendance by Date & Time:
                             {Object.entries(dateAttendance)
-                                .sort(([a], [b]) => new Date(a) - new Date(b))
-                                .map(([date, count]) => (
-                                    <div key={date}>
-                                        <strong>{date}</strong>: {count}
+                                .sort(
+                                    ([a], [b]) =>
+                                        new Date(a.split(" ")[0]) - new Date(b.split(" ")[0])
+                                )
+                                .map(([key, count]) => (
+                                    <div key={key}>
+                                        <strong>{key}</strong>: {count}
                                     </div>
                                 ))}
                         </p>
@@ -515,13 +629,13 @@ const TeamBuilding = () => {
                     <Card title="Attendance Chart" style={{ marginTop: 24 }}>
                         <Column
                             data={chartData}
-                            xField="date"
+                            xField="datetime"
                             yField="count"
                             label={{ position: "middle", style: { fill: "#c1cbd7" } }}
-                            xAxis={{ label: { autoRotate: false } }}
+                            xAxis={{ label: { autoRotate: true } }}
                             yAxis={{ title: { text: "Attendees" } }}
                             meta={{
-                                date: { alias: "Date" },
+                                datetime: { alias: "Date & Time" },
                                 count: { alias: "Attendance Count" },
                             }}
                         />
@@ -536,9 +650,14 @@ const TeamBuilding = () => {
                                 { title: "Name", dataIndex: "name", key: "name" },
                                 { title: "Attendees", dataIndex: "headCount" },
                                 {
-                                    title: "Dates",
+                                    title: "Availability",
                                     dataIndex: "dates",
-                                    render: (val) => val?.join(", "),
+                                    render: (arr) =>
+                                        arr?.map(({ date, start, end }) => (
+                                            <div key={date}>
+                                                {date} ({start} - {end})
+                                            </div>
+                                        )),
                                 },
                                 { title: "Food", dataIndex: "food" },
                                 { title: "Tools", dataIndex: "tools" },
