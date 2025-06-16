@@ -53,10 +53,21 @@
 }
 
 .title-gradient {
-    background: linear-gradient(90deg, #00ffff, #00ffaa);
+    background: linear-gradient(90deg, #00ffff, #66ccff);
     -webkit-background-clip: text;
     background-clip: text;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    color: transparent;
+    text-shadow: 0 0 4px rgba(0, 255, 255, 0.3), 0 0 8px rgba(0, 200, 255, 0.2);
+}
+
+@keyframes glowText {
+    0% {
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+    100% {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.6),
+            0 0 30px rgba(255, 255, 100, 0.5);
+    }
 }
 
 .ocean-subtitle {

@@ -19,7 +19,6 @@ import {
 } from "antd";
 import { db } from "../firebase";
 import { collection, getDocs, getDoc, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
-import { random } from "lodash";
 import {
     UserAddOutlined,
     TeamOutlined,
