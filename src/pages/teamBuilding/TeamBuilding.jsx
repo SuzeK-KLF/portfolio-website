@@ -21,6 +21,7 @@ import { db } from "../../firebase";
 import { UserAddOutlined, StarFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import deepOceanLogo from "../../assets/deepocean.png";
+import { Pie, Column } from "@ant-design/charts";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -138,7 +139,17 @@ const TeamBuilding = () => {
     };
 
     const currentUser = players.find((p) => p.id === currentUserId);
-    console.log("currentUser", currentUser);
+
+    const dateAttendance = players.reduce((acc, player) => {
+        player.dates?.forEach((date) => {
+            acc[date] = (acc[date] || 0) + (player.headCount || 1);
+        });
+        return acc;
+    }, {});
+
+    const chartData = Object.entries(dateAttendance)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const totalPeople = players.reduce((sum, p) => sum + (p.headCount || 0), 0);
     const allTools = players.map((p) => p.tools).filter(Boolean);
@@ -407,19 +418,19 @@ const TeamBuilding = () => {
                                 value={formData.dates}
                                 onChange={(val) => setFormData({ ...formData, dates: val })}
                             >
-                                <Option value="2025-06-21">June 21 (Monday 周六)</Option>
-                                <Option value="2025-06-22">June 22 (Tuesday 周日)</Option>
-                                <Option value="2025-06-23">June 23 (Wednesday 周一)</Option>
-                                <Option value="2025-06-28">June 28 (Monday 周六)</Option>
-                                <Option value="2025-06-29">June 29 (Tuesday 周日)</Option>
-                                <Option value="2025-06-30">June 30 (Wednesday 周一)</Option>
+                                <Option value="2025-06-21">June 21 (Sat 周六)</Option>
+                                <Option value="2025-06-22">June 22 (Sun 周日)</Option>
+                                <Option value="2025-06-23">June 23 (Mon 周一)</Option>
+                                <Option value="2025-06-28">June 28 (Sat 周六)</Option>
+                                <Option value="2025-06-29">June 29 (Sun 周日)</Option>
+                                <Option value="2025-06-30">June 30 (Mon 周一)</Option>
                             </Select>
                         </Form.Item>
 
                         <Form.Item label="Number of Attendees (including family)">
                             <Input
                                 type="number"
-                                min={1}
+                                min={0}
                                 max={100}
                                 value={formData.headCount}
                                 onChange={(e) =>
@@ -493,6 +504,30 @@ const TeamBuilding = () => {
                         <p style={{ color: "black" }}>
                             Dietary Restrictions: <strong>{allDiets.join(" | ") || "N/A"}</strong>
                         </p>
+                        <p style={{ color: "black" }}>
+                            Attendance by Date:
+                            {Object.entries(dateAttendance)
+                                .sort(([a], [b]) => new Date(a) - new Date(b))
+                                .map(([date, count]) => (
+                                    <div key={date}>
+                                        <strong>{date}</strong>: {count}
+                                    </div>
+                                ))}
+                        </p>
+                    </Card>
+                    <Card title="Attendance Chart" style={{ marginTop: 24 }}>
+                        <Column
+                            data={chartData}
+                            xField="date"
+                            yField="count"
+                            label={{ position: "middle", style: { fill: "#c1cbd7" } }}
+                            xAxis={{ label: { autoRotate: false } }}
+                            yAxis={{ title: { text: "Attendees" } }}
+                            meta={{
+                                date: { alias: "Date" },
+                                count: { alias: "Attendance Count" },
+                            }}
+                        />
                     </Card>
                     <Divider />
 
