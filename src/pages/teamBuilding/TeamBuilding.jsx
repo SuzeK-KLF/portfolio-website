@@ -12,7 +12,6 @@ import {
     Space,
     Slider,
     Avatar,
-    Progress,
     App,
     Table,
 } from "antd";
@@ -29,7 +28,6 @@ const { Option } = Select;
 const ageGroups = ["20s", "30s", "40s", "50+"];
 const positions = ["Forward", "Midfield", "Defense", "Goalkeeper"];
 const colorPrimary = "#00bcd4";
-const colorSecondary = "#1890ff";
 
 const TeamBuilding = () => {
     const { message } = App.useApp();
@@ -38,7 +36,6 @@ const TeamBuilding = () => {
     const [currentUserId, setCurrentUserId] = useState(localStorage.getItem("team_user_id"));
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
-    const [form] = Form.useForm();
 
     const [newPlayer, setNewPlayer] = useState({
         name: "",
