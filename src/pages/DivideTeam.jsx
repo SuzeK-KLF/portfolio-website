@@ -29,6 +29,8 @@ import {
 } from "@ant-design/icons";
 import "antd/dist/reset.css";
 import { App } from "antd";
+import deepOceanLogo from "../assets/deepocean.png";
+import { Link } from "react-router-dom";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -217,12 +219,28 @@ export default function TeamDividerPage() {
                     boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                 }}
             >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <TrophyOutlined style={{ fontSize: 24, color: "white" }} />
+                <Link
+                    to="/deep-ocean"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        textDecoration: "none",
+                    }}
+                >
+                    <img
+                        src={deepOceanLogo}
+                        alt="Deep Ocean Logo"
+                        style={{
+                            height: 40,
+                            width: "auto",
+                            filter: "drop-shadow(0 0 4px rgba(0,0,0,0.3))",
+                        }}
+                    />
                     <Title level={3} style={{ color: "white", margin: 0 }}>
                         Sunday Football Team Divider
                     </Title>
-                </div>
+                </Link>
                 <Badge count={players.length} style={{ backgroundColor: colorPrimary }}>
                     <TeamOutlined style={{ fontSize: 20, color: "white" }} />
                 </Badge>
@@ -247,12 +265,11 @@ export default function TeamDividerPage() {
                             </div>
                         }
                         style={{
-                            background: "rgba(255, 255, 255, 0.9)",
+                            background: "#9ca8b8",
                             backdropFilter: "blur(8px)",
                             borderRadius: 12,
                             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                         }}
-                        headStyle={{ borderBottom: "1px solid #f0f0f0" }}
                     >
                         <Space direction="vertical" style={{ width: "100%" }}>
                             <Input

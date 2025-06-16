@@ -159,3 +159,11 @@ img {
 .ant-select-dropdown {
     border-radius: 8px !important;
 }
+
+.ant-select-selection-placeholder {
+    color: #f0f0f0 !important;
+}
+
+.ant-input::placeholder {
+    color: #f0f0f0 !important;
+}

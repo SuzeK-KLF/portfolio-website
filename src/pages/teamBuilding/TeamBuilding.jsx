@@ -9,15 +9,17 @@ import {
     Typography,
     Spin,
     Divider,
-    message,
     Space,
     Slider,
     Avatar,
     Progress,
+    App,
 } from "antd";
 import { collection, getDocs, setDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { UserAddOutlined, StarFilled } from "@ant-design/icons";
+import { Link } from "react-router-dom";
+import deepOceanLogo from "../../assets/deepocean.png";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -28,6 +30,7 @@ const colorPrimary = "#00bcd4";
 const colorSecondary = "#1890ff";
 
 const TeamBuilding = () => {
+    const { message } = App.useApp();
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(localStorage.getItem("team_user_id"));
@@ -40,6 +43,14 @@ const TeamBuilding = () => {
         positions: [],
         abilityScores: 70,
     });
+    const [formData, setFormData] = useState({
+        dates: [],
+        headCount: 1,
+        dietRestrictions: "",
+        food: "",
+        tools: "",
+    });
+
     const [editingId, setEditingId] = useState(null);
 
     useEffect(() => {
@@ -83,22 +94,53 @@ const TeamBuilding = () => {
         setNewPlayer({ name: "", ageGroup: "30s", positions: [], abilityScores: 70 });
     };
 
-    const handleAddOrUpdatePlayer = () => {
-        // Implementation for Firebase writing/updating goes here
-        message.success(editingId ? "Player updated." : "Player added.");
+    const handleFormSubmit = async () => {
+        if (!currentUserId) return message.warning("Please select your name first.");
+        try {
+            await setDoc(doc(db, "players", currentUserId), {
+                ...players.find((p) => p.id === currentUserId),
+                ...formData,
+            });
+            message.success("RSVP submitted!");
+        } catch (e) {
+            message.error("Failed to submit RSVP.");
+            console.error(e);
+        }
     };
+
+    const currentUser = players.find((p) => p.id === currentUserId);
+    console.log("currentUser", currentUser);
 
     return (
         <div style={{ padding: 24, maxWidth: 1000, margin: "auto" }}>
-            <Title level={2} style={{ color: "white" }}>
-                Team Building RSVP
-            </Title>
+            <Link
+                to="/deep-ocean"
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    textDecoration: "none",
+                }}
+            >
+                <img
+                    src={deepOceanLogo}
+                    alt="Deep Ocean Logo"
+                    style={{
+                        height: 60,
+                        width: "auto",
+                        filter: "drop-shadow(0 0 4px rgba(0,0,0,0.3))",
+                    }}
+                />
+                <Title level={2} style={{ color: "white" }}>
+                    Team Building RSVP
+                </Title>
+            </Link>
             <Text style={{ color: "#aaa" }}>Please select your name or create a new one.</Text>
 
             {loading ? (
                 <Spin size="large" />
             ) : (
-                <Card style={{ marginTop: 24, backgroundColor: "#111", borderColor: "#333" }}>
+                <Card style={{ marginTop: 24, backgroundColor: "#c1cbd7", borderColor: "#333" }}>
                     <Select
                         style={{ width: 300, backgroundColor: "#8a8a8a", color: "white" }}
                         placeholder="Select your name"
@@ -317,6 +359,110 @@ const TeamBuilding = () => {
             </Modal>
 
             <Divider style={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+
+            {currentUserId && (
+                <Card
+                    style={{ marginTop: 24, backgroundColor: "#c1cbd7", borderColor: "#333" }}
+                    title="Your RSVP Info"
+                >
+                    <Form layout="vertical">
+                        <Form.Item label="Available Dates">
+                            <Select
+                                mode="multiple"
+                                placeholder="Choose one or more dates"
+                                value={formData.dates}
+                                onChange={(val) => setFormData({ ...formData, dates: val })}
+                            >
+                                <Option value="2025-06-29">June 29 (Long Weekend)</Option>
+                                <Option value="2025-07-06">July 6 (Next Long Weekend)</Option>
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item label="Number of Attendees (including family)">
+                            <Input
+                                type="number"
+                                min={1}
+                                max={10}
+                                value={formData.headCount}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        headCount: parseInt(e.target.value || "1"),
+                                    })
+                                }
+                            />
+                        </Form.Item>
+
+                        <Form.Item label="Dietary Restrictions">
+                            <Input.TextArea
+                                placeholder="E.g. No peanuts, vegetarian"
+                                value={formData.dietRestrictions}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, dietRestrictions: e.target.value })
+                                }
+                            />
+                        </Form.Item>
+
+                        <Form.Item label="Food You're Bringing">
+                            <Input.TextArea
+                                placeholder="E.g. Fried rice, watermelon"
+                                value={formData.food}
+                                onChange={(e) => setFormData({ ...formData, food: e.target.value })}
+                            />
+                        </Form.Item>
+
+                        <Form.Item label="Tools / Equipment You're Bringing">
+                            <Input.TextArea
+                                placeholder="E.g. Grill, extra chairs"
+                                value={formData.tools}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, tools: e.target.value })
+                                }
+                            />
+                        </Form.Item>
+
+                        <Button type="primary" onClick={handleFormSubmit} style={{ marginTop: 16 }}>
+                            Submit RSVP
+                        </Button>
+                    </Form>
+                </Card>
+            )}
+
+            {/* Summary Section */}
+            <Divider style={{ borderColor: "rgba(255, 255, 255, 0.1)", marginTop: 48 }} />
+            <Title level={3} style={{ color: "white" }}>
+                All Participants Overview
+            </Title>
+            {players.length === 0 ? (
+                <Text style={{ color: "#ccc" }}>No participants yet.</Text>
+            ) : (
+                players.map((player) => (
+                    <Card
+                        key={player.id}
+                        title={<Text style={{ color: "black" }}>{player.name}</Text>}
+                        style={{
+                            marginBottom: 16,
+                            backgroundColor: "#c1cbd7",
+                            borderColor: "#333",
+                        }}
+                    >
+                        <Text type="secondary">Dates: </Text>
+                        {player.dates?.join(", ") || "N/A"}
+                        <br />
+                        <Text type="secondary">Attendees: </Text>
+                        {player.headCount || 0}
+                        <br />
+                        <Text type="secondary">Diet: </Text>
+                        {player.dietRestrictions || "N/A"}
+                        <br />
+                        <Text type="secondary">Food: </Text>
+                        {player.food || "N/A"}
+                        <br />
+                        <Text type="secondary">Tools: </Text>
+                        {player.tools || "N/A"}
+                    </Card>
+                ))
+            )}
         </div>
     );
 };
