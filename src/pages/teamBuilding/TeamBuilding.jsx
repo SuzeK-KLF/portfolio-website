@@ -14,8 +14,9 @@ import {
     Avatar,
     Progress,
     App,
+    Table,
 } from "antd";
-import { collection, getDocs, setDoc, doc } from "firebase/firestore";
+import { collection, getDocs, setDoc, addDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { UserAddOutlined, StarFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -35,6 +36,7 @@ const TeamBuilding = () => {
     const [loading, setLoading] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(localStorage.getItem("team_user_id"));
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
     const [form] = Form.useForm();
 
     const [newPlayer, setNewPlayer] = useState({
@@ -42,33 +44,51 @@ const TeamBuilding = () => {
         ageGroup: "30s",
         positions: [],
         abilityScores: 70,
+        dates: [],
+        attendance: 1,
+        dietary: "",
+        foods: [],
+        tools: [],
     });
+
     const [formData, setFormData] = useState({
         dates: [],
-        headCount: 1,
+        headCount: 0,
         dietRestrictions: "",
         food: "",
         tools: "",
     });
 
-    const [editingId, setEditingId] = useState(null);
+    const fetchPlayers = async () => {
+        setLoading(true);
+        try {
+            const snapshot = await getDocs(collection(db, "players"));
+            const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setPlayers(data);
+        } catch (err) {
+            message.error("Failed to load players.");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchPlayers = async () => {
-            setLoading(true);
-            try {
-                const snapshot = await getDocs(collection(db, "players"));
-                const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-                setPlayers(data);
-            } catch (err) {
-                message.error("Failed to load players.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchPlayers();
     }, []);
+
+    useEffect(() => {
+        const user = players.find((p) => p.id === currentUserId);
+        if (user) {
+            setFormData({
+                dates: user.dates || [],
+                headCount: user.headCount || 1,
+                dietRestrictions: user.dietRestrictions || "",
+                food: user.food || "",
+                tools: user.tools || "",
+            });
+        }
+    }, [players, currentUserId]);
 
     const handleUserSelect = (value) => {
         setCurrentUserId(value);
@@ -80,13 +100,17 @@ const TeamBuilding = () => {
     };
 
     const handleModalOk = async () => {
-        const newId = newPlayer.name.toLowerCase().replace(/\s+/g, "_");
-        await setDoc(doc(db, "players", newId), { ...newPlayer });
-        setPlayers((prev) => [...prev, { id: newId, ...newPlayer }]);
-        setCurrentUserId(newId);
-        localStorage.setItem("team_user_id", newId);
+        const docRef = await addDoc(collection(db, "players"), {
+            name: newPlayer.name,
+            ageGroup: newPlayer.ageGroup,
+            positions: newPlayer.positions,
+            abilityScores: newPlayer.abilityScores,
+        });
+        setCurrentUserId(docRef.id);
+        localStorage.setItem("team_user_id", docRef.id);
         setIsModalVisible(false);
         setNewPlayer({ name: "", ageGroup: "30s", positions: [], abilityScores: 70 });
+        fetchPlayers();
     };
 
     const handleModalCancel = () => {
@@ -99,9 +123,14 @@ const TeamBuilding = () => {
         try {
             await setDoc(doc(db, "players", currentUserId), {
                 ...players.find((p) => p.id === currentUserId),
-                ...formData,
+                dates: formData.dates,
+                headCount: formData.headCount,
+                dietRestrictions: formData.dietRestrictions,
+                food: formData.food,
+                tools: formData.tools,
             });
             message.success("RSVP submitted!");
+            fetchPlayers();
         } catch (e) {
             message.error("Failed to submit RSVP.");
             console.error(e);
@@ -110,6 +139,11 @@ const TeamBuilding = () => {
 
     const currentUser = players.find((p) => p.id === currentUserId);
     console.log("currentUser", currentUser);
+
+    const totalPeople = players.reduce((sum, p) => sum + (p.headCount || 0), 0);
+    const allTools = players.map((p) => p.tools).filter(Boolean);
+    const allFoods = players.map((p) => p.food).filter(Boolean);
+    const allDiets = players.map((p) => p.dietRestrictions).filter(Boolean);
 
     return (
         <div style={{ padding: 24, maxWidth: 1000, margin: "auto" }}>
@@ -360,7 +394,7 @@ const TeamBuilding = () => {
 
             <Divider style={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
 
-            {currentUserId && (
+            {currentUser && (
                 <Card
                     style={{ marginTop: 24, backgroundColor: "#c1cbd7", borderColor: "#333" }}
                     title="Your RSVP Info"
@@ -373,8 +407,12 @@ const TeamBuilding = () => {
                                 value={formData.dates}
                                 onChange={(val) => setFormData({ ...formData, dates: val })}
                             >
-                                <Option value="2025-06-29">June 29 (Long Weekend)</Option>
-                                <Option value="2025-07-06">July 6 (Next Long Weekend)</Option>
+                                <Option value="2025-06-21">June 21 (Monday 周六)</Option>
+                                <Option value="2025-06-22">June 22 (Tuesday 周日)</Option>
+                                <Option value="2025-06-23">June 23 (Wednesday 周一)</Option>
+                                <Option value="2025-06-28">June 28 (Monday 周六)</Option>
+                                <Option value="2025-06-29">June 29 (Tuesday 周日)</Option>
+                                <Option value="2025-06-30">June 30 (Wednesday 周一)</Option>
                             </Select>
                         </Form.Item>
 
@@ -382,7 +420,7 @@ const TeamBuilding = () => {
                             <Input
                                 type="number"
                                 min={1}
-                                max={10}
+                                max={100}
                                 value={formData.headCount}
                                 onChange={(e) =>
                                     setFormData({
@@ -393,7 +431,7 @@ const TeamBuilding = () => {
                             />
                         </Form.Item>
 
-                        <Form.Item label="Dietary Restrictions">
+                        <Form.Item label="Dietary Restrictions 忌口">
                             <Input.TextArea
                                 placeholder="E.g. No peanuts, vegetarian"
                                 value={formData.dietRestrictions}
@@ -430,38 +468,54 @@ const TeamBuilding = () => {
 
             {/* Summary Section */}
             <Divider style={{ borderColor: "rgba(255, 255, 255, 0.1)", marginTop: 48 }} />
-            <Title level={3} style={{ color: "white" }}>
-                All Participants Overview
+
+            <Title level={4} style={{ color: "white" }}>
+                {currentUser ? "RSVP Summary" : "Select your name to see the summary"}
             </Title>
-            {players.length === 0 ? (
-                <Text style={{ color: "#ccc" }}>No participants yet.</Text>
-            ) : (
-                players.map((player) => (
-                    <Card
-                        key={player.id}
-                        title={<Text style={{ color: "black" }}>{player.name}</Text>}
-                        style={{
-                            marginBottom: 16,
-                            backgroundColor: "#c1cbd7",
-                            borderColor: "#333",
-                        }}
+            {currentUser && (
+                <>
+                    <Button
+                        onClick={() => setShowDetails(!showDetails)}
+                        style={{ marginBottom: 16 }}
                     >
-                        <Text type="secondary">Dates: </Text>
-                        {player.dates?.join(", ") || "N/A"}
-                        <br />
-                        <Text type="secondary">Attendees: </Text>
-                        {player.headCount || 0}
-                        <br />
-                        <Text type="secondary">Diet: </Text>
-                        {player.dietRestrictions || "N/A"}
-                        <br />
-                        <Text type="secondary">Food: </Text>
-                        {player.food || "N/A"}
-                        <br />
-                        <Text type="secondary">Tools: </Text>
-                        {player.tools || "N/A"}
+                        {showDetails ? "Hide Details" : "Show Details"}
+                    </Button>
+                    <Card title="Summary" style={{ backgroundColor: "#c1cbd7", color: "black" }}>
+                        <p style={{ color: "black" }}>
+                            Total Attendees: <strong>{totalPeople}</strong>
+                        </p>
+                        <p style={{ color: "black" }}>
+                            All Foods: <strong>{allFoods.join(", ") || "N/A"}</strong>
+                        </p>
+                        <p style={{ color: "black" }}>
+                            All Tools: <strong>{allTools.join(", ") || "N/A"}</strong>
+                        </p>
+                        <p style={{ color: "black" }}>
+                            Dietary Restrictions: <strong>{allDiets.join(" | ") || "N/A"}</strong>
+                        </p>
                     </Card>
-                ))
+                    <Divider />
+
+                    {showDetails && (
+                        <Table
+                            dataSource={players}
+                            rowKey="id"
+                            columns={[
+                                { title: "Name", dataIndex: "name", key: "name" },
+                                { title: "Attendees", dataIndex: "headCount" },
+                                {
+                                    title: "Dates",
+                                    dataIndex: "dates",
+                                    render: (val) => val?.join(", "),
+                                },
+                                { title: "Food", dataIndex: "food" },
+                                { title: "Tools", dataIndex: "tools" },
+                            ]}
+                            pagination={false}
+                            style={{ backgroundColor: "#c1cbd7", color: "white" }}
+                        />
+                    )}
+                </>
             )}
         </div>
     );
