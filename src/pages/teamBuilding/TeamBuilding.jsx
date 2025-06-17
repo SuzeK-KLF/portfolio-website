@@ -448,6 +448,9 @@ const TeamBuilding = () => {
                                                 <Option value="2025-06-23">
                                                     June 23 (Mon 周一)
                                                 </Option>
+                                                <Option value="2025-06-24">
+                                                    June 24 (Tue 周二)
+                                                </Option>
                                                 <Option value="2025-06-28">
                                                     June 28 (Sat 周六)
                                                 </Option>
